@@ -16,9 +16,28 @@ st.header('Data viewer')
 st.dataframe(df)
 
 st.header ('Fuel Type by Year')
-
-fuel_fig= px.histogram(df, x='fuel',
+st.write(px.histogram(df, x='fuel',
                       color = 'year',
                       color_discrete_sequence = ['navy', 'darkorange']
-                      )
-fuel_fig.show()
+                      ))
+st.header('Compare Price distribution between Vehicle Contions')
+condition_list = sorted(df['condition'].unique())
+condition_1 = st.selectbox('Select Condition 1',
+                           condition_list, index=condition_list.index('like new'))
+
+condition_2 = st.selectbox('Select Condition 2',
+                           condition_list, index=condition_list.index('excellent'))
+mask_filter = (df['condition'] == condition_1) | df['condition'] == condition_2
+df_filtered = df[mask_filter]
+normalize = st.checkbox('Normalize Histogram', value=True)
+if normalize:
+    histnorm = 'percent'
+
+else:
+    histnorm= None
+
+st.write(px.histogram(df_filtered,
+                      x='price',
+                      color='manufacturer',
+                      histnorm=histnorm,
+                      barmode='overlay'))
