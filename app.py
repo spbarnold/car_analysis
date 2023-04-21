@@ -9,35 +9,37 @@ df['manufacturer'] = df['model'].apply(lambda x: x.split()[0])
 df['year'] = pd.DatetimeIndex(df['date_posted']).year
 #calculates the age of the vehicle at time of posting
 df['age'] = df['year'] - df['model_year']
+#converting year to string for plotly-express
+df['year'] = df['year'].apply(str)
 
 #creates text header above the dataframe
 st.header('Data viewer')
 #displays dataframe using streamlit
 st.dataframe(df)
 
-st.header ('Fuel Type by Year')
+st.header('Car Price by Age')
+st.write(px.scatter (df, x='age', y='price', color='year', 
+                      color_discrete_sequence = ['navy', 'darkorange'],
+                    ))
+
+st.write('Fuel Type of Cars Posted by Year')
 st.write(px.histogram(df, x='fuel',
                       color = 'year',
-                      color_discrete_sequence = ['navy', 'darkorange']
-                      ))
-st.header('Compare Price distribution between Vehicle Contions')
-condition_list = sorted(df['condition'].unique())
-condition_1 = st.selectbox('Select Condition 1',
-                           condition_list, index=condition_list.index('like new'))
+                      color_discrete_sequence = ['navy', 'darkorange'],
+                       ))
 
-condition_2 = st.selectbox('Select Condition 2',
-                           condition_list, index=condition_list.index('excellent'))
-mask_filter = (df['condition'] == condition_1) | df['condition'] == condition_2
+st.write('Compare Prices of Cars versus Fuel Type')
+fuel_list = sorted(df['fuel'].unique())
+fuel_1 = st.selectbox('Select Fuel 1',
+                      fuel_list, index=fuel_list.index('gas'))
+
+fuel_2 = st.selectbox('Select Fuel 2',
+                      fuel_list, index=fuel_list.index('hybrid'))
+mask_filter = (df['fuel'] == fuel_1) |(df['fuel'] == fuel_2)
 df_filtered = df[mask_filter]
-normalize = st.checkbox('Normalize Histogram', value=True)
-if normalize:
-    histnorm = 'percent'
-
-else:
-    histnorm= None
 
 st.write(px.histogram(df_filtered,
                       x='price',
-                      color='manufacturer',
-                      histnorm=histnorm,
-                      barmode='overlay'))
+                      nbins=50,
+                      color='fuel'
+                      ))
